@@ -1,0 +1,135 @@
+class SimuladorReforma:
+    def __init__(self, atividade, margem, custo,ano, 
+                 aliq_iss=None, aliq_icms=None, cred_icms=None, 
+                 aliq_cbs=0.0,
+                 aliq_irpj=0.0, add_ir=0.0, aliq_csll=0.0,
+                 pct_base_ir=0.0, pct_base_cs=0.0, pct_base_ircs= 0.0):
+
+        self.ano = ano
+        self.atividade = atividade
+        self.margem = margem
+        self.custo = custo
+
+        self.aliq_iss = aliq_iss if atividade == 'Serviço' else 0
+        self.aliq_icms = aliq_icms
+        self.cred_icms = cred_icms
+        
+
+        self.aliq_pis = 0.0065 * (1 - aliq_icms) #Como no caso de servicos o icms vai ser zero, funciona pros dois casos
+        self.aliq_cofins = 0.03 * (1 - aliq_icms)
+        self.aliq_cbs = aliq_cbs
+
+        self.aliq_irpj = aliq_irpj
+        self.add_ir = add_ir
+        self.aliq_csll = aliq_csll
+
+        if atividade == 'Comércio':
+            self.pct_base_ir = pct_base_ir
+            self.pct_base_cs = pct_base_cs
+            self.pct_base_ircs = pct_base_ircs
+            self.irpj_efetivo = aliq_irpj * pct_base_ir
+            self.csll_efetivo = aliq_csll * pct_base_cs
+        else: 
+            self.pct_base_ir = pct_base_ircs
+            self.pct_base_cs = pct_base_ircs
+            self.irpj_efetivo = aliq_irpj * pct_base_ircs
+            self.csll_efetivo = aliq_csll * pct_base_ircs
+
+        self.preco_venda = self.descobrir_preco_venda()
+    
+    def descobrir_icms_ef(self, valor):
+        icms_deb = valor * self.aliq_icms
+        icms_cred = self.custo * self.cred_icms
+        icms_net = (icms_deb-icms_cred)/valor
+        
+        return icms_net
+
+
+    #
+    def calcular_margem_real(self, preco_venda):
+        
+        #PIS, COFINS, ISS, ICMS
+        icms = preco_venda * self.descobrir_icms_ef(preco_venda)
+        pis = preco_venda * self.aliq_pis
+        cofins = preco_venda * self.aliq_cofins
+        iss = preco_venda * self.aliq_iss
+        receita_liquida = preco_venda - (icms + pis + cofins + iss)
+        lair = receita_liquida - self.custo
+
+        #IRCS
+        base_ir = preco_venda * self.pct_base_ir
+        base_cs = preco_venda * self.pct_base_cs
+
+        valor_ir = base_ir * self.aliq_irpj
+        valor_cs = base_cs * self.aliq_csll
+
+        lucro_liquido = lair - (valor_ir + valor_cs)
+
+        return (lucro_liquido / preco_venda)
+        
+    def descobrir_preco_venda(self):
+        # Intervalo de busca binária
+        baixo = self.custo
+        alto = self.custo * 150000
+        tolerancia = 0.0001
+        max_iteracoes = 1_000_000
+
+        for _ in range(max_iteracoes):
+            meio = (baixo + alto) / 2
+            margem_real = self.calcular_margem_real(meio)
+
+            if abs(margem_real - self.margem) < tolerancia:
+                return meio
+            elif margem_real < self.margem:
+                baixo = meio
+            else:
+                alto = meio
+
+        return (baixo + alto) / 2  # valor final aproximado
+    
+    def calcular_DRE(self):
+        icms = self.preco_venda * self.descobrir_icms_ef(self.preco_venda)
+        pis = self.preco_venda * self.aliq_pis
+        cofins = self.preco_venda * self.aliq_cofins
+        iss = self.preco_venda  * self.aliq_iss
+
+        receita_liquida = self.preco_venda - (icms + pis + cofins + iss)
+        lair = receita_liquida - self.custo
+
+        base_ir = self.preco_venda * self.pct_base_ir
+        base_cs = self.preco_venda * self.pct_base_cs
+
+        valor_ir = base_ir * self.aliq_irpj
+        valor_cs = base_cs * self.aliq_csll
+
+        lucro_liquido = lair - (valor_ir + valor_cs)
+        margem = lucro_liquido / self.preco_venda
+        dre = {
+            "Custo Mercadoria/Servico": self.custo,
+            "Margem de Lucro (%)": margem ,
+            "ICMS efetivo (%)":self.descobrir_icms_ef(self.preco_venda) ,
+            "aliq PIS (%)":self.aliq_pis,
+            "aliq Cofins (%)":self.aliq_cofins,
+            "aliq ISS (%)": self.aliq_iss,
+            "aliq IR (%)":self.aliq_irpj ,
+            "alic CSLL (%)":self.aliq_csll,
+            "Base IR (%)":self.pct_base_ir ,
+            "base CS(%)":self.pct_base_cs ,
+            "Preço de venda":self.preco_venda,            
+            "ICMS": icms,
+            "ISS (R$)": iss,
+            "pis": pis,
+            "cofins":cofins,
+            "receita liquida":receita_liquida,
+            "Lucro antes IR/CS":lair,
+            "Base IR":base_ir,
+            "Base CS":base_cs,
+            "IR Valor":valor_ir,
+            "CS Valor":valor_cs,
+            "Lucro Líquido":lucro_liquido
+              
+        }
+
+
+            
+        return dre
