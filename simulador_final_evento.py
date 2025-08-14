@@ -285,7 +285,7 @@ if VISAO == "DRE's Comparativas":
     col1, col2, col3, col4 = st.columns(4)
     # Dados de exemplo para cada conjunto (ajuste conforme necessário)
     dados_2026 = {
-        'Métrica': ['Faturamento - NF', 'CBS', 'Receita Bruta (pré CBS)', 'PIS', 'COFINS', 'ICMS', 'Receita Líquida',
+        'Métrica': ['Faturamento - NF', 'CBS', 'Receita Bruta (pré CBS)', 'PIS', 'COFINS', 'ICMS/ISS', 'Receita Líquida',
                     'CMV/CSV', 'Lucro antes IR/CS', 'IR', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
         'Valor': [
             f'R$ {dre26["Preço de venda"]:,.2f}',
@@ -293,7 +293,7 @@ if VISAO == "DRE's Comparativas":
             f'R$ {dre26["Preço de venda"]:,.2f}',
             f'R$ {dre26["pis"]:,.2f}',
             f'R$ {dre26["cofins"]:,.2f}',
-            f'R$ {dre26["ICMS"]:,.2f}',
+            f'R$ {dre26["ICMS"] + dre26["ISS (R$)"]:,.2f}',
             f'R$ {dre26["receita liquida"]:,.2f}',
             f'R$ {dre26["Custo Mercadoria/Servico"]:,.2f}',
             f'R$ {dre26["Lucro antes IR/CS"]:,.2f}',
