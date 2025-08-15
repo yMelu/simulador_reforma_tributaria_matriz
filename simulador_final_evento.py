@@ -460,7 +460,7 @@ elif VISAO == "Resumo":
         ]
     }
     cor_customizada_2026 = {
-        'Receita Bruta (pré CBS)': '#333333',  # Ouro
+        'Receita Bruta (pré CBS)': '#a64d79',  # Ouro
         'Lucro Líquido': '#4682B4',  # Verde
         'Margem de Lucro': '#6B8E23',  # Azul claro
     }
@@ -494,7 +494,7 @@ elif VISAO == "Resumo":
 
 
     cor_customizada_c2 = {
-        'Receita Bruta (pré CBS)': '#333333',  # Ouro
+        'Receita Bruta (pré CBS)': '#a64d79',  # Ouro
     }
 
     dados_rc3 = {
