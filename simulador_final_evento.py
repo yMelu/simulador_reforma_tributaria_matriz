@@ -18,7 +18,7 @@ def entrada_dados_sidebar(ATIVIDADE):
         st.divider()
         st.subheader('Input de informações')
 
-        MARGEM = st.number_input('Indique sua margem desejada (%)', value=20.0, step=0.5, min_value=0.0) / 100
+        MARGEM = st.number_input('Indique sua margem desejada (%)', value=20.0, step=0.5, min_value=0.0,max_value=71.0) / 100
 
         if ATIVIDADE == 'Serviço':
             CUSTO = st.number_input('Indique o custo do serviço prestado', value=6200.0, min_value=1.0, step=1.0)
@@ -286,7 +286,7 @@ c2 = simuladorc2.calcular_DRE()
 if simulador27_lucro is not None:
     rc3 = simulador27_lucro.calcular_DRE()
 else: 
-    st.warning('Caso 3 não encontrado com os parametros apresentados')
+    st.warning('Caso 3 não encontrado com os parametros apresentados.\n\n Modifique a margem desejada ou divergêcia maxima para convergir.')
     st.stop()
 
 
