@@ -43,6 +43,9 @@ def entrada_dados_sidebar(ATIVIDADE):
             else:
                 PCT_IRCS = st.number_input('Percentual Base IR CSLL (%)', value=32.0, step=1.0) / 100
 
+        with st.expander('Contorle de tolerância - C3'):
+            TOLERANCIA = st.slider('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,max_value=float(CUSTO),help="Menor = Mais preciso")
+
     return {
         "MARGEM": MARGEM,
         "CUSTO": CUSTO,
@@ -54,7 +57,8 @@ def entrada_dados_sidebar(ATIVIDADE):
         "ALIQ_CSLL": ALIQ_CSLL,
         "PCT_BASE_IR": PCT_BASE_IR,
         "PCT_BASE_CS": PCT_BASE_CS,
-        "PCT_IRCS": PCT_IRCS
+        "PCT_IRCS": PCT_IRCS,
+        "TOL":TOLERANCIA
     }
 
 
@@ -74,7 +78,7 @@ def gerar_tabela_html(dados, cor_customizada):
     return tabela_html
 
 
-def buscar_margem_por_lucro_liquido(simulador_class, lucro_desejado, atividade, entradas,
+def buscar_margem_por_lucro_liquido(simulador_class, lucro_desejado, atividade, entradas, #c3
                                      ano=2027, tol=100.0, max_iter=1000):
     """
     Busca binária para encontrar a margem que resulte no lucro líquido desejado.
@@ -273,13 +277,17 @@ simuladorc2, margem_ajustada, tentativas = buscar_margem_por_preco_dre(
 )
 simulador27_lucro, margem_lucro, tentativas = buscar_margem_por_lucro_liquido(
     SimuladorReforma2027,
+    tol=ENTRADAS['TOL'],
     lucro_desejado=dre26["Lucro Líquido"],
     atividade=ATIVIDADE,
     entradas=ENTRADAS
 )
 c2 = simuladorc2.calcular_DRE()
-rc3 = simulador27_lucro.calcular_DRE()
-
+if simulador27_lucro is not None:
+    rc3 = simulador27_lucro.calcular_DRE()
+else: 
+    st.warning('Caso 3 não encontrado com os parametros apresentados')
+    st.stop()
 
 
 if VISAO == "DRE's Comparativas":
