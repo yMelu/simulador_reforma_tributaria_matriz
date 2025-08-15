@@ -3,6 +3,7 @@ from class_reforma_evento2026 import SimuladorReforma
 from reforma_27_c1_c2_c3 import SimuladorReforma2027
 import pandas as pd
 st.set_page_config(layout='wide')
+st.logo('logo_matriz_red.png',size='large',link='https://www.matrizcontabil.com.br/')
 
 
 def entrada_dados_sidebar(ATIVIDADE):
@@ -248,7 +249,7 @@ def buscar_margem_por_preco_dre(
 
 
 ATIVIDADE = st.sidebar.selectbox('Selecione sua atividade',['Comércio','Serviço'])
-st.title(f"Simulador Reforma 2026/2027 Matriz Contábil {ATIVIDADE}")
+st.title(f"Simulador Matriz Contábil 2027 - {ATIVIDADE}")
 
 
 VISAO = st.selectbox('Selecione a visão',['Resumo','Custo tomador',"DRE's Comparativas" ])
