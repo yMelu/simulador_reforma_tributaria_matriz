@@ -12,7 +12,7 @@ def entrada_dados_sidebar(ATIVIDADE):
     CRED_ICMS = 0
     PCT_IRCS = 0
     PCT_BASE_IR = 0
-    ADD_IR = 0
+    ADD_IR = False
     PCT_BASE_CS = 0
 
     with st.sidebar:
@@ -35,7 +35,7 @@ def entrada_dados_sidebar(ATIVIDADE):
                 ALIQ_IRPJ = st.number_input('Alíquota IRPJ (%)', value=15.0, step=1.0) / 100
                 ALIQ_CBS  = st.number_input('Alíquota CBS (%)', value=9.0, step=1.0) / 100
             with col2:
-                ADD_IR = st.number_input('Adicional de IR (%)', value=0.0, step=1.0) / 100
+                ADD_IR = st.checkbox('Adicional de IR?')
                 ALIQ_CSLL = st.number_input('Alíquota CSLL (%)', value=9.0, step=1.0) / 100
 
         with st.expander('Indique Percentuais Base'):
