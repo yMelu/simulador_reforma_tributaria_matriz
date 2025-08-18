@@ -12,6 +12,7 @@ def entrada_dados_sidebar(ATIVIDADE):
     CRED_ICMS = 0
     PCT_IRCS = 0
     PCT_BASE_IR = 0
+    ADD_IR = 0
     PCT_BASE_CS = 0
 
     with st.sidebar:
@@ -34,6 +35,7 @@ def entrada_dados_sidebar(ATIVIDADE):
                 ALIQ_IRPJ = st.number_input('Alíquota IRPJ (%)', value=15.0, step=1.0) / 100
                 ALIQ_CBS  = st.number_input('Alíquota CBS (%)', value=9.0, step=1.0) / 100
             with col2:
+                ADD_IR = st.number_input('Adicional de IR (%)', value=0.0, step=1.0) / 100
                 ALIQ_CSLL = st.number_input('Alíquota CSLL (%)', value=9.0, step=1.0) / 100
 
         with st.expander('Indique Percentuais Base'):
@@ -44,7 +46,7 @@ def entrada_dados_sidebar(ATIVIDADE):
                 PCT_IRCS = st.number_input('Percentual Base IR CSLL (%)', value=32.0, step=1.0) / 100
 
         with st.expander('Contorle de tolerância - C3'):
-            TOLERANCIA = st.slider('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,max_value=float(CUSTO),help="Menor = Mais preciso")
+            TOLERANCIA = st.number_input('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,max_value=float(CUSTO/5),help="Menor = Mais preciso")
 
     return {
         "MARGEM": MARGEM,
@@ -54,6 +56,7 @@ def entrada_dados_sidebar(ATIVIDADE):
         "CRED_ICMS": CRED_ICMS,
         "ALIQ_CBS": ALIQ_CBS,
         "ALIQ_IRPJ": ALIQ_IRPJ,
+        "ADD_IR": ADD_IR,
         "ALIQ_CSLL": ALIQ_CSLL,
         "PCT_BASE_IR": PCT_BASE_IR,
         "PCT_BASE_CS": PCT_BASE_CS,
@@ -450,9 +453,10 @@ elif VISAO == "Resumo":
     col1, col2, col3, col4 = st.columns(4)
     # Dados de exemplo para cada conjunto (ajuste conforme necessário)
     dados_2026 = {
-        'Métrica': ['Faturamento - NF',  'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro', 'Comparacao 2026'],
+        'Métrica': ['Faturamento - NF', 'Variação PV 2026' , 'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro', 'Variação Lucro Líquido 2026'],
         'Valor': [
             f'R$ {dre26["Preço de venda"]:,.2f}',
+            f'-',
             f'R$ {dre26["Preço de venda"]:,.2f}',
             f'R$ {dre26["Lucro Líquido"]:,.2f}',
             f'{dre26["Margem de Lucro (%)"]:,.2%}',
@@ -466,9 +470,10 @@ elif VISAO == "Resumo":
     }
 
     dados_2027 = {
-        'Métrica': ['Faturamento - NF',  'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro','Comparacao 2026'],
+        'Métrica': ['Faturamento - NF', 'Variação PV 2026', 'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro','Variação Lucro Líquido 2026'],
         'Valor': [
             f'R$ {dre27["Nota fiscal"]:,.2f}',
+            f'{(dre27["Nota fiscal"]/dre26["Preço de venda"]) -1:,.1%}',
             f'R$ {dre27["Preço de venda"]:,.2f}',
             f'R$ {dre27["Lucro Líquido"]:,.2f}',
             f'{dre27["Margem de Lucro (%)"]:,.2%}',
@@ -482,9 +487,10 @@ elif VISAO == "Resumo":
 
 
     dados_c2 = {
-        'Métrica': ['Faturamento - NF',  'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro','Comparacao 2026'],
+        'Métrica': ['Faturamento - NF', 'Variação PV 2026',  'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro','Variação Lucro Líquido 2026'],
         'Valor': [
             f'R$ {c2["Nota fiscal"]:,.2f}',
+            f'{(c2["Nota fiscal"]/dre26["Preço de venda"]) -1:,.1%}',
             f'R$ {c2["Preço de venda"]:,.2f}',
             f'R$ {c2["Lucro Líquido"]:,.2f}',
             f'{c2["Margem de Lucro (%)"]:,.2%}',
@@ -498,9 +504,10 @@ elif VISAO == "Resumo":
     }
 
     dados_rc3 = {
-        'Métrica': ['Faturamento - NF',  'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro', 'Comparacao 2026'],
+        'Métrica': ['Faturamento - NF', 'Variação PV 2026', 'Receita Bruta (pré CBS)',   'Lucro Líquido', 'Margem de Lucro', 'Variação Lucro Líquido 2026'],
         'Valor': [
             f'R$ {rc3["Nota fiscal"]:,.2f}',
+            f'{(rc3["Nota fiscal"]/dre26["Preço de venda"]) -1:,.1%}',
             f'R$ {rc3["Preço de venda"]:,.2f}',
             f'R$ {rc3["Lucro Líquido"]:,.2f}',
             f'{rc3["Margem de Lucro (%)"]:,.2%}',
@@ -528,3 +535,5 @@ elif VISAO == "Resumo":
     with col4:
         st.subheader('2027 - C3')
         st.markdown(gerar_tabela_html(dados_rc3,cor_customizada_c3), unsafe_allow_html=True)
+
+        rc3["Nota fiscal"]
