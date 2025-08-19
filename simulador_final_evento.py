@@ -48,6 +48,15 @@ def entrada_dados_sidebar(ATIVIDADE):
         with st.expander('Contorle de tolerância - C3'):
             TOLERANCIA = st.number_input('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,max_value=float(CUSTO/5),help="Menor = Mais preciso")
 
+        if ATIVIDADE == 'Serviço' and ADD_IR:
+            ADD_IR = 3.2 / 100
+
+        elif ATIVIDADE == 'Comércio' and ADD_IR:
+            ADD_IR = .8 / 100
+
+        else:
+            ADD_IR = 0
+
     return {
         "MARGEM": MARGEM,
         "CUSTO": CUSTO,
@@ -118,7 +127,7 @@ def buscar_margem_por_lucro_liquido(simulador_class, lucro_desejado, atividade, 
             cred_icms=entradas["CRED_ICMS"] if atividade != 'Serviço' else 0,
             aliq_cbs=entradas["ALIQ_CBS"],
             aliq_irpj=entradas["ALIQ_IRPJ"],
-            add_ir=0,
+            add_ir=entradas["ADD_IR"],
             aliq_csll=entradas["ALIQ_CSLL"],
             pct_base_ir=entradas["PCT_BASE_IR"] if atividade != 'Serviço' else 0,
             pct_base_cs=entradas["PCT_BASE_CS"] if atividade != 'Serviço' else 0,
@@ -198,7 +207,7 @@ def criar_simulador(ano, atividade, entradas, classe_simulador):
         cred_icms=entradas["CRED_ICMS"] if atividade != 'Serviço' else 0,
         aliq_cbs=entradas["ALIQ_CBS"],
         aliq_irpj=entradas["ALIQ_IRPJ"],
-        add_ir=0,
+        add_ir=entradas["ADD_IR"],
         aliq_csll=entradas["ALIQ_CSLL"],
         pct_base_ir=entradas["PCT_BASE_IR"] if atividade != 'Serviço' else 0,
         pct_base_cs=entradas["PCT_BASE_CS"] if atividade != 'Serviço' else 0,
@@ -231,7 +240,7 @@ def buscar_margem_por_preco_dre(
             cred_icms=entradas["CRED_ICMS"] if atividade != 'Serviço' else 0,
             aliq_cbs=entradas["ALIQ_CBS"],
             aliq_irpj=entradas["ALIQ_IRPJ"],
-            add_ir=0,
+            add_ir=entradas["ADD_IR"],
             aliq_csll=entradas["ALIQ_CSLL"],
             pct_base_ir=entradas["PCT_BASE_IR"] if atividade != 'Serviço' else 0,
             pct_base_cs=entradas["PCT_BASE_CS"] if atividade != 'Serviço' else 0,
@@ -298,7 +307,7 @@ if VISAO == "DRE's Comparativas":
     # Dados de exemplo para cada conjunto (ajuste conforme necessário)
     dados_2026 = {
         'Métrica': ['Faturamento - NF', 'CBS', 'Receita Bruta (pré CBS)', 'PIS', 'COFINS', 'ICMS (C) / ISS (S)', 'Receita Líquida',
-                    'CMV/CSV', 'Lucro antes IR/CS', 'IR', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
+                    'CMV/CSV', 'Lucro antes IR/CS', 'IR','Adicional IR (R$)', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
         'Valor': [
             f'R$ {dre26["Preço de venda"]:,.2f}',
             f'R$ {0:,.2f}',
@@ -310,6 +319,7 @@ if VISAO == "DRE's Comparativas":
             f'R$ {dre26["Custo Mercadoria/Servico"]:,.2f}',
             f'R$ {dre26["Lucro antes IR/CS"]:,.2f}',
             f'R$ {dre26["IR Valor"]:,.2f}',
+            f'R$ {dre26["Adicional IR (R$)"]:,.2f}',
             f'R$ {dre26["CS Valor"]:,.2f}',
             f'R$ {dre26["Lucro Líquido"]:,.2f}',
             f'{dre26["Margem de Lucro (%)"]:,.2%}'
@@ -323,7 +333,7 @@ if VISAO == "DRE's Comparativas":
 
     dados_2027 = {
         'Métrica': ['Faturamento - NF', 'CBS', 'Receita Bruta (pré CBS)', 'PIS', 'COFINS', 'ICMS', 'Receita Líquida',
-                    'CMV/CSV', 'Lucro antes IR/CS', 'IR', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
+                    'CMV/CSV', 'Lucro antes IR/CS', 'IR','Adicional IR (R$)','CS', 'Lucro Líquido', 'Margem de Lucro'],
         'Valor': [
             f'R$ {dre27["Nota fiscal"]:,.2f}',
             f'R$ {dre27["CBS VALOR"]:,.2f}',
@@ -335,6 +345,7 @@ if VISAO == "DRE's Comparativas":
             f'R$ {dre26["Custo Mercadoria/Servico"]:,.2f}',
             f'R$ {dre27["Lucro antes IR/CS"]:,.2f}',
             f'R$ {dre27["IR Valor"]:,.2f}',
+            f'R$ {dre27["Adicional IR (R$)"]:,.2f}',
             f'R$ {dre27["CS Valor"]:,.2f}',
             f'R$ {dre27["Lucro Líquido"]:,.2f}',
             f'{dre27["Margem de Lucro (%)"]:,.2%}'
@@ -348,7 +359,7 @@ if VISAO == "DRE's Comparativas":
 
     dados_c2 = {
         'Métrica': ['Faturamento - NF', 'CBS', 'Receita Bruta (pré CBS)', 'PIS', 'COFINS', 'ICMS', 'Receita Líquida',
-                    'CMV/CSV', 'Lucro antes IR/CS', 'IR', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
+                    'CMV/CSV', 'Lucro antes IR/CS', 'IR','Adicional IR (R$)', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
         'Valor': [
             f'R$ {c2["Nota fiscal"]:,.2f}',
             f'R$ {c2["CBS VALOR"]:,.2f}',
@@ -360,6 +371,7 @@ if VISAO == "DRE's Comparativas":
             f'R$ {c2["Custo Mercadoria/Servico"]:,.2f}',
             f'R$ {c2["Lucro antes IR/CS"]:,.2f}',
             f'R$ {c2["IR Valor"]:,.2f}',
+            f'R$ {c2["Adicional IR (R$)"]:,.2f}',
             f'R$ {c2["CS Valor"]:,.2f}',
             f'R$ {c2["Lucro Líquido"]:,.2f}',
             f'{c2["Margem de Lucro (%)"]:,.2%}'
@@ -373,7 +385,7 @@ if VISAO == "DRE's Comparativas":
 
     dados_rc3 = {
         'Métrica': ['Faturamento - NF', 'CBS', 'Receita Bruta (pré CBS)', 'PIS', 'COFINS', 'ICMS', 'Receita Líquida',
-                    'CMV/CSV', 'Lucro antes IR/CS', 'IR', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
+                    'CMV/CSV', 'Lucro antes IR/CS', 'IR','Adicional IR (R$)', 'CS', 'Lucro Líquido', 'Margem de Lucro'],
         'Valor': [
             f'R$ {rc3["Nota fiscal"]:,.2f}',
             f'R$ {rc3["CBS VALOR"]:,.2f}',
@@ -385,6 +397,7 @@ if VISAO == "DRE's Comparativas":
             f'R$ {rc3["Custo Mercadoria/Servico"]:,.2f}',
             f'R$ {rc3["Lucro antes IR/CS"]:,.2f}',
             f'R$ {rc3["IR Valor"]:,.2f}',
+            f'R$ {rc3["Adicional IR (R$)"]:,.2f}',
             f'R$ {rc3["CS Valor"]:,.2f}',
             f'R$ {rc3["Lucro Líquido"]:,.2f}',
             f'{rc3["Margem de Lucro (%)"]:,.2%}'
@@ -537,3 +550,8 @@ elif VISAO == "Resumo":
         st.markdown(gerar_tabela_html(dados_rc3,cor_customizada_c3), unsafe_allow_html=True)
 
         rc3["Nota fiscal"]
+
+simulador2026.add_ir
+simulador2027.add_ir
+simuladorc2.add_ir
+simulador27_lucro.add_ir

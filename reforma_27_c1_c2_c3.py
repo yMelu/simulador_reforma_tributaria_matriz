@@ -38,9 +38,7 @@ class SimuladorReforma2027:
         #PV
         self.preco_venda = self.descobrir_preco_venda()
 
-        #Valores de 2026
-        self.receita_2026 = 20000.75
-        self.lucro_liquido_2026 = 5564.21
+ 
         
     
     def descobrir_icms_ef(self, valor):
@@ -54,7 +52,8 @@ class SimuladorReforma2027:
     def calcular_margem_real(self, preco_venda):
         icms = preco_venda * self.descobrir_icms_ef(preco_venda) 
         iss = preco_venda * self.aliq_iss
-        pv_antes_cbs = preco_venda - (icms + iss) #PV -> preco_venda
+        add_ir = preco_venda * self.add_ir   # <<< adicional de IR como o PIS
+        pv_antes_cbs = preco_venda - (icms + iss + add_ir) #PV -> preco_venda
         
         
         cbs = pv_antes_cbs * self.aliq_cbs
@@ -102,9 +101,10 @@ class SimuladorReforma2027:
     
     def calcular_DRE(self):        
         icms = self.preco_venda * self.descobrir_icms_ef(self.preco_venda)
+        add_ir = self.preco_venda * self.add_ir 
         iss = self.preco_venda * self.aliq_iss
         
-        pv_antes_cbs = self.preco_venda - (icms + iss) #PV -> preco_venda
+        pv_antes_cbs = self.preco_venda - (icms + iss + add_ir) #PV -> preco_venda
         
         #IRCS
         base_ir = self.preco_venda * self.pct_base_ir
@@ -135,6 +135,7 @@ class SimuladorReforma2027:
             "CBS (%)":self.aliq_cbs,
             "Preço de venda":self.preco_venda,            
             "ICMS": icms,
+            "Adicional IR (R$)": add_ir, 
             "Receita Base CBS": pv_antes_cbs,
             "Base IR":base_ir,
             "Base CS":base_cs,

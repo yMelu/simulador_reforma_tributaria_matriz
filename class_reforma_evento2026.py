@@ -44,16 +44,16 @@ class SimuladorReforma:
         
         return icms_net
 
-
-    #
     def calcular_margem_real(self, preco_venda):
         
         #PIS, COFINS, ISS, ICMS
         icms = preco_venda * self.descobrir_icms_ef(preco_venda)
         pis = preco_venda * self.aliq_pis
         cofins = preco_venda * self.aliq_cofins
+        add_ir = preco_venda * self.add_ir   # <<< adicional de IR como o PIS
         iss = preco_venda * self.aliq_iss
-        receita_liquida = preco_venda - (icms + pis + cofins + iss)
+        
+        receita_liquida = preco_venda - (icms + pis + cofins + add_ir +iss)
         lair = receita_liquida - self.custo
 
         #IRCS
@@ -64,7 +64,6 @@ class SimuladorReforma:
         valor_cs = base_cs * self.aliq_csll
 
         lucro_liquido = lair - (valor_ir + valor_cs)
-
         return (lucro_liquido / preco_venda)
         
     def descobrir_preco_venda(self):
@@ -91,9 +90,10 @@ class SimuladorReforma:
         icms = self.preco_venda * self.descobrir_icms_ef(self.preco_venda)
         pis = self.preco_venda * self.aliq_pis
         cofins = self.preco_venda * self.aliq_cofins
+        add_ir = self.preco_venda * self.add_ir   # <<< adicional de IR
         iss = self.preco_venda  * self.aliq_iss
 
-        receita_liquida = self.preco_venda - (icms + pis + cofins + iss)
+        receita_liquida = self.preco_venda - (icms + pis + cofins + add_ir + iss)
         lair = receita_liquida - self.custo
 
         base_ir = self.preco_venda * self.pct_base_ir
@@ -104,12 +104,14 @@ class SimuladorReforma:
 
         lucro_liquido = lair - (valor_ir + valor_cs)
         margem = lucro_liquido / self.preco_venda
+        
         dre = {
             "Custo Mercadoria/Servico": self.custo,
             "Margem de Lucro (%)": margem ,
             "ICMS efetivo (%)":self.descobrir_icms_ef(self.preco_venda) ,
             "aliq PIS (%)":self.aliq_pis,
             "aliq Cofins (%)":self.aliq_cofins,
+            "aliq Adicional IR (%)": self.add_ir,     # <<< novo campo
             "aliq ISS (%)": self.aliq_iss,
             "aliq IR (%)":self.aliq_irpj ,
             "alic CSLL (%)":self.aliq_csll,
@@ -120,6 +122,7 @@ class SimuladorReforma:
             "ISS (R$)": iss,
             "pis": pis,
             "cofins":cofins,
+            "Adicional IR (R$)": add_ir,                   # <<< novo campo
             "receita liquida":receita_liquida,
             "Lucro antes IR/CS":lair,
             "Base IR":base_ir,
@@ -130,6 +133,4 @@ class SimuladorReforma:
               
         }
 
-
-            
         return dre
