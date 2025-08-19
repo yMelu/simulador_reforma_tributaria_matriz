@@ -551,7 +551,3 @@ elif VISAO == "Resumo":
 
         rc3["Nota fiscal"]
 
-simulador2026.add_ir
-simulador2027.add_ir
-simuladorc2.add_ir
-simulador27_lucro.add_ir
