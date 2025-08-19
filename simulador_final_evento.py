@@ -549,5 +549,5 @@ elif VISAO == "Resumo":
         st.subheader('2027 - C3')
         st.markdown(gerar_tabela_html(dados_rc3,cor_customizada_c3), unsafe_allow_html=True)
 
-        rc3["Nota fiscal"]
+        
 
