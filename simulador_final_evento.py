@@ -3,7 +3,7 @@ from class_reforma_evento2026 import SimuladorReforma
 from reforma_27_c1_c2_c3 import SimuladorReforma2027
 import pandas as pd
 st.set_page_config(layout='wide')
-st.logo('logo_matriz_red.png',size='large',link='https://www.matrizcontabil.com.br/')
+#st.logo('logo_matriz_red.png',size='large',link='https://www.matrizcontabil.com.br/')
 
 
 def entrada_dados_sidebar(ATIVIDADE):
