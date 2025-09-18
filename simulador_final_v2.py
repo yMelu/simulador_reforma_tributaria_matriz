@@ -22,15 +22,14 @@ def entrada_dados_sidebar(ATIVIDADE):
         MARGEM = st.number_input('Indique sua margem desejada (%)', value=20.0, step=0.5, min_value=0.0,max_value=71.0) / 100
 
         if ATIVIDADE == 'Serviço':
-            #Custos não pode ser zero para a classe. E não podemos substui-lo pelo dicionario, visto que ainda precisamos de custos no Serviço
-            CUSTO = 0.001#st.number_input('Indique o custo do serviço prestado', value=6200.0, min_value=1.0, step=1.0)
-            despesas = montar_despesas_creditos()
+            CUSTO = st.number_input('Indique o custo do serviço prestado', value=6200.0, min_value=1.0, step=1.0)
             ALIQ_ISS = st.number_input('Indique sua Alíquota de ISS (%)', value=5.0, step=1.0, min_value=2.0, max_value=5.0) / 100
+            despesas = montar_despesas_creditos()
         else:
             CUSTO = st.number_input('Indique o custo da mercadoria vendida', value=10000.0, min_value=1.0, step=1.0)
-            despesas = montar_despesas_creditos()
             ALIQ_ICMS = st.number_input('Indique sua Alíquota de ICMS (%)', value=20.5, step=1.0, min_value=0.0) / 100
             CRED_ICMS = st.number_input('Indique seu crédito sob ICMS (%)', value=7.0, step=1.0, min_value=0.0) / 100
+            despesas = montar_despesas_creditos()
 
         with st.expander('Indique suas alíquotas'):
             col1, col2 = st.columns(2)
@@ -49,15 +48,7 @@ def entrada_dados_sidebar(ATIVIDADE):
                 PCT_IRCS = st.number_input('Percentual Base IR CSLL (%)', value=32.0, step=1.0) / 100
 
         with st.expander('Contorle de tolerância - C3'):
-            tol = float(CUSTO/5)
-            if CUSTO == 0.0:
-                tol = sum(item["bruto"] for item in despesas.values())
-                st.write(tol)
-
-            if tol < 100.0:
-                tol = 100.0   
-            TOLERANCIA = st.number_input('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,max_value=tol,help="Menor = Mais preciso")
-            
+            TOLERANCIA = st.number_input('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,max_value=float(CUSTO/5),help="Menor = Mais preciso")
 
         if ATIVIDADE == 'Serviço' and ADD_IR:
             ADD_IR = 3.2 / 100
@@ -71,7 +62,6 @@ def entrada_dados_sidebar(ATIVIDADE):
     return {
         "MARGEM": MARGEM,
         "CUSTO": CUSTO,
-        "DESPESAS_CREDITOS":despesas,
         "ALIQ_ISS": ALIQ_ISS,
         "ALIQ_ICMS": ALIQ_ICMS,
         "CRED_ICMS": CRED_ICMS,
@@ -82,9 +72,25 @@ def entrada_dados_sidebar(ATIVIDADE):
         "PCT_BASE_IR": PCT_BASE_IR,
         "PCT_BASE_CS": PCT_BASE_CS,
         "PCT_IRCS": PCT_IRCS,
-        "TOL":TOLERANCIA
+        "TOL":TOLERANCIA,
+        "DESPESAS_CRED":despesas
     }
+
+# Função para criar uma tabela HTML
+def gerar_tabela_html(dados, cor_customizada):
+    df = pd.DataFrame(dados)
+    tabela_html = df.to_html(classes='table table-striped', index=False, escape=False)
+
+    if cor_customizada:
+        for campo, cor in cor_customizada.items():
+            # Substituindo o valor das células específicas por HTML com estilos
+            tabela_html = tabela_html.replace(
+                f'>{campo}<', f' style="background-color: {cor};">{campo}<'
+            )
     
+    
+    return tabela_html
+
 def calc_creditos(dict_despesas, aliq_cbs):
     for c in dict_despesas.keys():
         dict_despesas[c]['cred'] = round(dict_despesas[c]['base'] * aliq_cbs, 2)
@@ -119,50 +125,35 @@ def montar_despesas_creditos():
     despesas_dict = {
         "locacao": {
             "bruto": DESPESAS_LOCACAO,
-            "liquido": DESPESAS_LOCACAO * 0.30
+            "base": DESPESAS_LOCACAO * 0.30
         },
         "alim_hosp": {
             "bruto": DESPESAS_ALIM_HOSP,
-            "liquido": DESPESAS_ALIM_HOSP * 0.60
+            "base": DESPESAS_ALIM_HOSP * 0.60
         },
         "serv_prof": {
             "bruto": DESPESAS_SERV_PROF,
-            "liquido": DESPESAS_SERV_PROF * 0.70
+            "base": DESPESAS_SERV_PROF * 0.70
         },
         "demais": {
             "bruto": DESPESAS_DEMAIS,
-            "liquido": DESPESAS_DEMAIS * 1.00
+            "base": DESPESAS_DEMAIS * 1.00
         },
         "simples": {
             "bruto": DESPESAS_SIMPLES,
-            "liquido": DESPESAS_SIMPLES * 0.04  # 96% descontado → sobra 4%
+            "base": DESPESAS_SIMPLES * 0.04  # 96% descontado → sobra 4%
         },
         "trabalhistas": {
             "bruto": TRABALHISTAS,
-            "liquido": TRABALHISTAS * 0.00
+            "base": TRABALHISTAS * 0.00
         },
         "saude_educacao": {
             "bruto": DESPESAS_SAUDE_EDUCACAO,
-            "liquido": DESPESAS_SAUDE_EDUCACAO * 0.40
+            "base": DESPESAS_SAUDE_EDUCACAO * 0.40
         }
     }
     
     return despesas_dict
-
-# Função para criar uma tabela HTML
-def gerar_tabela_html(dados, cor_customizada):
-    df = pd.DataFrame(dados)
-    tabela_html = df.to_html(classes='table table-striped', index=False, escape=False)
-
-    if cor_customizada:
-        for campo, cor in cor_customizada.items():
-            # Substituindo o valor das células específicas por HTML com estilos
-            tabela_html = tabela_html.replace(
-                f'>{campo}<', f' style="background-color: {cor};">{campo}<'
-            )
-    
-    
-    return tabela_html
 
 def buscar_margem_por_lucro_liquido(simulador_class, lucro_desejado, atividade, entradas, #c3
                                      ano=2027, tol=100.0, max_iter=1000):
@@ -206,6 +197,7 @@ def buscar_margem_por_lucro_liquido(simulador_class, lucro_desejado, atividade, 
             pct_base_ir=entradas["PCT_BASE_IR"] if atividade != 'Serviço' else 0,
             pct_base_cs=entradas["PCT_BASE_CS"] if atividade != 'Serviço' else 0,
             pct_base_ircs=entradas["PCT_IRCS"] if atividade != 'Comércio' else 0,
+            despesas_cred = entradas['DESPESAS_CRED']
         )
 
         dre = simulador.calcular_DRE()
@@ -224,53 +216,8 @@ def buscar_margem_por_lucro_liquido(simulador_class, lucro_desejado, atividade, 
 
     return None, None, iteracoes
 
-def buscar_margem_por_preco_dre(simulador_class, preco_dre26, atividade, custo, 
-                                 aliq_iss, aliq_icms, cred_icms, aliq_cbs, 
-                                 aliq_irpj, aliq_csll, pct_base_ir, pct_base_cs, pct_ircs,
-                                 ano=2027, tol=0.01, max_iter=1000):
-
-    margem_min = 0.0
-    margem_max = 1.0  # margem de 1000% (ajuste se necessário)
-    iteracoes = 0
-
-    while iteracoes < max_iter:
-        margem_meio = (margem_min + margem_max) / 2
-
-        simulador = simulador_class(
-            ano=ano,
-            atividade=atividade,
-            margem=margem_meio,
-            custo=custo,
-            aliq_iss=aliq_iss if atividade == 'Serviço' else 0,
-            aliq_icms=aliq_icms if atividade != 'Serviço' else 0,
-            cred_icms=cred_icms if atividade != 'Serviço' else 0,
-            aliq_cbs=aliq_cbs,
-            aliq_irpj=aliq_irpj,
-            add_ir=0,
-            aliq_csll=aliq_csll,
-            pct_base_ir=pct_base_ir if atividade != 'Serviço' else 0,
-            pct_base_cs=pct_base_cs if atividade != 'Serviço' else 0,
-            pct_base_ircs=pct_ircs if atividade != 'Comércio' else 0,
-        )
-
-        dre = simulador.calcular_DRE()
-        preco_calculado = dre['Preço de venda']
-
-        erro = preco_calculado - preco_dre26
-
-        if abs(erro) <= tol:
-            return simulador, margem_meio, iteracoes
-
-        if preco_calculado > preco_dre26:
-            margem_max = margem_meio
-        else:
-            margem_min = margem_meio
-
-        iteracoes += 1
-
-    return None, None, iteracoes
-
 def criar_simulador(ano, atividade, entradas, classe_simulador):
+          
     return classe_simulador(
         ano=ano,
         atividade=atividade,
@@ -285,7 +232,8 @@ def criar_simulador(ano, atividade, entradas, classe_simulador):
         aliq_csll=entradas["ALIQ_CSLL"],
         pct_base_ir=entradas["PCT_BASE_IR"] if atividade != 'Serviço' else 0,
         pct_base_cs=entradas["PCT_BASE_CS"] if atividade != 'Serviço' else 0,
-        pct_base_ircs=entradas["PCT_IRCS"] if atividade != 'Comércio' else 0
+        pct_base_ircs=entradas["PCT_IRCS"] if atividade != 'Comércio' else 0,
+        despesas_cred = entradas['DESPESAS_CRED']
     )
 
 def buscar_margem_por_preco_dre(
@@ -294,7 +242,7 @@ def buscar_margem_por_preco_dre(
     atividade,
     entradas,
     ano=2027,
-    tol=0.01,
+    tol=100.0,
     max_iter=1000
 ):
     margem_min = 0.0
@@ -319,6 +267,7 @@ def buscar_margem_por_preco_dre(
             pct_base_ir=entradas["PCT_BASE_IR"] if atividade != 'Serviço' else 0,
             pct_base_cs=entradas["PCT_BASE_CS"] if atividade != 'Serviço' else 0,
             pct_base_ircs=entradas["PCT_IRCS"] if atividade != 'Comércio' else 0,
+            despesas_cred = entradas['DESPESAS_CRED']
         )
 
         dre = simulador.calcular_DRE()
@@ -347,8 +296,20 @@ st.divider()
 
 ENTRADAS = entrada_dados_sidebar(ATIVIDADE)
 
+aliq_cbs = float(ENTRADAS['ALIQ_CBS'])
+for _, item in ENTRADAS['DESPESAS_CRED'].items():
+    # garante numéricos
+    bruto = float(item['bruto'])
+    base  = float(item['base'])
+
+    cred  = round(base * aliq_cbs, 2)
+    custo = round(bruto - cred, 2)
+
+    item['cred']  = cred
+    item['custo'] = custo
+
 simulador2026 = criar_simulador(2026, ATIVIDADE, ENTRADAS, SimuladorReforma)
-simulador2027 = criar_simulador(2026, ATIVIDADE, ENTRADAS, SimuladorReforma2027)
+simulador2027 = criar_simulador(2027, ATIVIDADE, ENTRADAS, SimuladorReforma2027)
 
 # Calcula a DRE
 dre26 = simulador2026.calcular_DRE()
@@ -359,7 +320,8 @@ simuladorc2, margem_ajustada, tentativas = buscar_margem_por_preco_dre(
     SimuladorReforma2027,
     preco_dre26=dre26["Preço de venda"],
     atividade=ATIVIDADE,
-    entradas=ENTRADAS
+    entradas=ENTRADAS,
+    tol=ENTRADAS['TOL'],
 )
 simulador27_lucro, margem_lucro, tentativas = buscar_margem_por_lucro_liquido(
     SimuladorReforma2027,
@@ -374,7 +336,6 @@ if simulador27_lucro is not None:
 else: 
     st.warning('Caso 3 não encontrado com os parametros apresentados.\n\n Modifique a margem desejada ou divergêcia maxima para convergir.')
     st.stop()
-
 
 if VISAO == "DRE's Comparativas":
     col1, col2, col3, col4 = st.columns(4)
@@ -623,14 +584,6 @@ elif VISAO == "Resumo":
         st.subheader('2027 - C3')
         st.markdown(gerar_tabela_html(dados_rc3,cor_customizada_c3), unsafe_allow_html=True)
 
-#Ajustar a clase para receber o novo dicionário
-#Ajustar o streamlit para enviar o dicionário em todas as chamadas de classe
-#Calcular os débitos e créditos
-#Incluir os debitos liquidos dos creditos na mesma variável do custo
-#O restante deve seguir normalmente
-#Lembrar a diferença de calcular DRE e descobrir PV
-
-#2026 Não pode mudar, lógica de ano a ano
-
-
 st.write(ENTRADAS)
+
+simulador2026.despesas_cred

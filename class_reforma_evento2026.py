@@ -3,12 +3,12 @@ class SimuladorReforma:
                  aliq_iss=None, aliq_icms=None, cred_icms=None, 
                  aliq_cbs=0.0,
                  aliq_irpj=0.0, add_ir=0.0, aliq_csll=0.0,
-                 pct_base_ir=0.0, pct_base_cs=0.0, pct_base_ircs= 0.0):
+                 pct_base_ir=0.0, pct_base_cs=0.0, pct_base_ircs= 0.0, despesas_cred= {}):
 
         self.ano = ano
         self.atividade = atividade
         self.margem = margem
-        self.custo = custo
+        #self.custo = custo
 
         self.aliq_iss = aliq_iss if atividade == 'Serviço' else 0
         self.aliq_icms = aliq_icms
@@ -22,7 +22,13 @@ class SimuladorReforma:
         self.aliq_irpj = aliq_irpj
         self.add_ir = add_ir
         self.aliq_csll = aliq_csll
-
+        
+        #Despesas livres de creditos
+        self.despesas_cred = self.calc_creditos(despesas_cred)
+        self.despesas_livres_creditos = sum(item['bruto'] for item in self.despesas_cred.values())
+        self.custo = custo + self.despesas_livres_creditos
+        
+        
         if atividade == 'Comércio':
             self.pct_base_ir = pct_base_ir
             self.pct_base_cs = pct_base_cs
@@ -37,6 +43,14 @@ class SimuladorReforma:
 
         self.preco_venda = self.descobrir_preco_venda()
     
+
+    def calc_creditos(self,dict_despesas):
+        for c in dict_despesas.keys():
+            dict_despesas[c]['cred'] = round(dict_despesas[c]['base'] * self.aliq_cbs, 2)
+            dict_despesas[c]['custo'] = round(dict_despesas[c]['bruto'] - dict_despesas[c]['cred'], 2)
+
+        return dict_despesas
+
     def descobrir_icms_ef(self, valor):
         icms_deb = valor * self.aliq_icms
         icms_cred = self.custo * self.cred_icms
