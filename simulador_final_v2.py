@@ -377,7 +377,7 @@ if VISAO == "DRE's Comparativas":
             f'R$ {0:,.2f}',
             f'R$ {dre27["ICMS"]:,.2f}',
             f'R$ {dre27["Receita Base CBS"]:,.2f}',
-            f'R$ {dre26["Custo Mercadoria/Servico"]:,.2f}',
+            f'R$ {dre27["Custo Mercadoria/Servico"]:,.2f}',
             f'R$ {dre27["Lucro antes IR/CS"]:,.2f}',
             f'R$ {dre27["IR Valor"]:,.2f}',
             f'R$ {dre27["Adicional IR (R$)"]:,.2f}',
@@ -584,6 +584,10 @@ elif VISAO == "Resumo":
         st.subheader('2027 - C3')
         st.markdown(gerar_tabela_html(dados_rc3,cor_customizada_c3), unsafe_allow_html=True)
 
-st.write(ENTRADAS)
 
-simulador2026.despesas_cred
+df_creditos_mostrar = pd.DataFrame(simulador2026.despesas_cred)
+df_creditos_mostrar = df_creditos_mostrar.to_html()
+with st.expander('Créditos 2027'):
+    st.markdown(df_creditos_mostrar, unsafe_allow_html=True)
+
+

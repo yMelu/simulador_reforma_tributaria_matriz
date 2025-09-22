@@ -26,8 +26,10 @@ class SimuladorReforma2027:
         self.despesas_cred = self.calc_creditos(despesas_cred)
         self.despesas_livres_creditos = sum(item['custo'] for item in self.despesas_cred.values())
         
+        self.cmv = custo
         self.custo = custo + self.despesas_livres_creditos
         
+
         if atividade == 'Comércio':
             self.pct_base_ir = pct_base_ir
             self.pct_base_cs = pct_base_cs
@@ -45,7 +47,7 @@ class SimuladorReforma2027:
 
     def descobrir_icms_ef(self, valor):
         icms_deb = valor * self.aliq_icms
-        icms_cred = self.custo * self.cred_icms
+        icms_cred = self.cmv * self.cred_icms
         icms_net = (icms_deb-icms_cred)/valor
         
         return icms_net
