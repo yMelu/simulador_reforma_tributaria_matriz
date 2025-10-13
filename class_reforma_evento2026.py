@@ -3,7 +3,7 @@ class SimuladorReforma:
                  aliq_iss=None, aliq_icms=None, cred_icms=None, 
                  aliq_cbs=0.0,
                  aliq_irpj=0.0, add_ir=0.0, aliq_csll=0.0,
-                 pct_base_ir=0.0, pct_base_cs=0.0, pct_base_ircs= 0.0, despesas_cred= {}):
+                 pct_base_ir=0.0, pct_base_cs=0.0, pct_base_ircs= 0.0,tipo_servico=None, despesas_cred= {}):
 
         self.ano = ano
         self.atividade = atividade
@@ -24,6 +24,7 @@ class SimuladorReforma:
         self.aliq_csll = aliq_csll
         
         #Despesas livres de creditos
+        self.cmv = custo
         self.despesas_cred = self.calc_creditos(despesas_cred)
         self.despesas_livres_creditos = sum(item['bruto'] for item in self.despesas_cred.values())
         self.custo = custo + self.despesas_livres_creditos
@@ -53,7 +54,7 @@ class SimuladorReforma:
 
     def descobrir_icms_ef(self, valor):
         icms_deb = valor * self.aliq_icms
-        icms_cred = self.custo * self.cred_icms
+        icms_cred = self.cmv * self.cred_icms
         icms_net = (icms_deb-icms_cred)/valor
         
         return icms_net

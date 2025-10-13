@@ -20,11 +20,13 @@ def entrada_dados_sidebar(ATIVIDADE):
         st.subheader('Input de informações')
 
         MARGEM = st.number_input('Indique sua margem desejada (%)', value=20.0, step=0.5, min_value=0.0,max_value=71.0) / 100
-
+        TIPO_SERVICO = 'demais_100'
         if ATIVIDADE == 'Serviço':
-            CUSTO = st.number_input('Indique o custo do serviço prestado', value=6200.0, min_value=1.0, step=1.0)
+            TIPO_SERVICO = st.selectbox('Tipo servico prestado',['locacao30','educacao_saude_40','alim_hosp_60','serv_prof_70','demais_100'])
+            CUSTO = 0.00001#st.number_input('Indique o custo do serviço prestado', value=6200.0, min_value=1.0, step=1.0)
             ALIQ_ISS = st.number_input('Indique sua Alíquota de ISS (%)', value=5.0, step=1.0, min_value=2.0, max_value=5.0) / 100
             despesas = montar_despesas_creditos()
+            
         else:
             CUSTO = st.number_input('Indique o custo da mercadoria vendida', value=10000.0, min_value=1.0, step=1.0)
             ALIQ_ICMS = st.number_input('Indique sua Alíquota de ICMS (%)', value=20.5, step=1.0, min_value=0.0) / 100
@@ -48,7 +50,7 @@ def entrada_dados_sidebar(ATIVIDADE):
                 PCT_IRCS = st.number_input('Percentual Base IR CSLL (%)', value=32.0, step=1.0) / 100
 
         with st.expander('Contorle de tolerância - C3'):
-            TOLERANCIA = st.number_input('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,max_value=float(CUSTO/5),help="Menor = Mais preciso")
+            TOLERANCIA = st.number_input('Indique a tolerância máxima para C3',value=100.0,step=1.0,min_value=10.0,help="Menor = Mais preciso")
 
         if ATIVIDADE == 'Serviço' and ADD_IR:
             ADD_IR = 3.2 / 100
@@ -73,7 +75,8 @@ def entrada_dados_sidebar(ATIVIDADE):
         "PCT_BASE_CS": PCT_BASE_CS,
         "PCT_IRCS": PCT_IRCS,
         "TOL":TOLERANCIA,
-        "DESPESAS_CRED":despesas
+        "DESPESAS_CRED":despesas,
+        "Tipo_serv":TIPO_SERVICO
     }
 
 # Função para criar uma tabela HTML
@@ -107,7 +110,7 @@ def montar_despesas_creditos():
     TRABALHISTAS = 0.0
     DESPESAS_SAUDE_EDUCACAO = 0.0 
 
-    with st.sidebar.expander("Inputs pós reforma"):
+    with st.sidebar.expander("Despesas"):
         st.subheader("Atualizando dados de despesas")
         col1, col2 = st.columns(2)
         with col1:
@@ -233,7 +236,9 @@ def criar_simulador(ano, atividade, entradas, classe_simulador):
         pct_base_ir=entradas["PCT_BASE_IR"] if atividade != 'Serviço' else 0,
         pct_base_cs=entradas["PCT_BASE_CS"] if atividade != 'Serviço' else 0,
         pct_base_ircs=entradas["PCT_IRCS"] if atividade != 'Comércio' else 0,
-        despesas_cred = entradas['DESPESAS_CRED']
+        tipo_servico=entradas["Tipo_serv"] if atividade != 'Comércio' else None,
+        despesas_cred = entradas['DESPESAS_CRED'],
+        
     )
 
 def buscar_margem_por_preco_dre(
@@ -591,3 +596,6 @@ with st.expander('Créditos 2027'):
     st.markdown(df_creditos_mostrar, unsafe_allow_html=True)
 
 
+st.write(ENTRADAS)
+st.write(simulador2027.tipo_serico)
+st.write(simulador2027.aliq_cbs)

@@ -1,9 +1,18 @@
-class SimuladorReforma2027:
+class SimuladorReforma2027:    
+    
+    _REDUCOES_BASE = {
+        "locacao30": 0.70,
+        "educacao_saude_40": 0.60,
+        "alim_hosp_60": 0.40,
+        "serv_prof_70": 0.30,
+        "demais_100": 1.00,
+    }
+
     def __init__(self, atividade, margem, custo,ano, 
                  aliq_iss=None, aliq_icms=None, cred_icms=None, 
                  aliq_cbs=0.0,
                  aliq_irpj=0.0, add_ir=0.0, aliq_csll=0.0,
-                 pct_base_ir=0.0, pct_base_cs=0.0, pct_base_ircs= 0.0, despesas_cred= {}):
+                 pct_base_ir=0.0, pct_base_cs=0.0, pct_base_ircs= 0.0,tipo_servico=None, despesas_cred= {}):
 
         self.ano = ano
         self.atividade = atividade
@@ -15,7 +24,9 @@ class SimuladorReforma2027:
         self.cred_icms = cred_icms
         
         #REFORMA
-        self.aliq_cbs = aliq_cbs
+        self.tipo_serico = tipo_servico
+        redutor = self._REDUCOES_BASE.get(tipo_servico, 1.0)
+        self.aliq_cbs = aliq_cbs * redutor
 
         #IRCS
         self.aliq_irpj = aliq_irpj
